@@ -1,13 +1,13 @@
 import 'dart:async';
-import 'package:fintracker/helpers/db.helper.dart';
-//import 'package:fintracker/model/category.model.dart';
-import 'package:fintracker/model/group.model.dart';
+import 'package:jomaboi/helpers/db.helper.dart';
+//import 'package:jomaboi/model/category.model.dart';
+import 'package:jomaboi/models/group.model.dart';
 import 'package:intl/intl.dart';
 
 class GroupDao {
   Future<int> create(Group group) async {
     final db = await getDBInstance();
-    var result = db.insert("groups", group.toJson());
+    var result = await db.insert("groups", group.toJson());
     return result;
   }
 
@@ -24,18 +24,15 @@ class GroupDao {
         "c.budget",
         "SUM(CASE WHEN t.type='DR' AND t.group=c.id THEN t.amount END) as expense"
       ].join(",");
-      DateTime from =
-          DateTime(DateTime.now().year, DateTime.now().month, 1, 0, 0);
+      DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1, 0, 0);
       DateTime to = DateTime.now().add(const Duration(days: 1));
       DateFormat formatter = DateFormat("yyyy-MM-dd HH:mm");
       String sql = "SELECT $fields FROM groups c "
-          "LEFT JOIN payments t ON t.groups = c.id AND t.datetime BETWEEN DATE('${formatter.format(from)}') AND DATE('${formatter.format(to)}')"
+          "LEFT JOIN payments t ON t.groups = c.id AND t.datetime BETWEEN DATE('${formatter.format(from)}') AND DATE('${formatter.format(to)}') "
           "GROUP BY c.id ";
       result = await db.rawQuery(sql);
     } else {
-      result = await db.query(
-        "groups",
-      );
+      result = await db.query("groups");
     }
     List<Group> groups = [];
     if (result.isNotEmpty) {
@@ -46,10 +43,7 @@ class GroupDao {
 
   Future<int> update(Group group) async {
     final db = await getDBInstance();
-
-    var result = await db.update("groups", group.toJson(),
-        where: "id = ?", whereArgs: [group.id]);
-
+    var result = await db.update("groups", group.toJson(), where: "id = ?", whereArgs: [group.id]);
     return result;
   }
 
@@ -69,9 +63,7 @@ class GroupDao {
 
   Future deleteAll() async {
     final db = await getDBInstance();
-    var result = await db.delete(
-      "groups",
-    );
+    var result = await db.delete("groups");
     return result;
   }
 }

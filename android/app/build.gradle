@@ -1,8 +1,12 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -22,42 +26,40 @@ if (flutterVersionName == null) {
 }
 
 android {
-    //namespace "me.sabbir.jomaboi"
-    namespace "me.nafish.fintracker"
-    compileSdkVersion flutter.compileSdkVersion
+    namespace "com.example.flutter_chat_pro"
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+ compileOptions {
+         sourceCompatibility JavaVersion.VERSION_17
+         targetCompatibility JavaVersion.VERSION_17
+     }
+    
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        //applicationId "me.sabbir.jomaboi"
-        applicationId "me.nafish.fintracker"
+        applicationId "com.raphaeldaka.flutterchatpro"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 23
+        targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
-//    signingConfigs {
-//        release {
-//            keyAlias 'nafish.ahmed.dev'
-//            keyPassword '@#Password123@#'
-//            storeFile file('D:\\androidKeys\\me.nafish.keystore')
-//            storePassword '@#Password123@#'
-//        }
-//    }
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-             signingConfig signingConfigs.debug
-            // signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
     }
 }
@@ -65,3 +67,5 @@ android {
 flutter {
     source '../..'
 }
+
+dependencies {}

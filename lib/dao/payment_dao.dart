@@ -1,17 +1,17 @@
 import 'dart:async';
-import 'package:fintracker/dao/account_dao.dart';
-import 'package:fintracker/dao/category_dao.dart';
-import 'package:fintracker/helpers/db.helper.dart';
-import 'package:fintracker/model/account.model.dart';
-import 'package:fintracker/model/category.model.dart';
-import 'package:fintracker/model/payment.model.dart';
+import 'package:jomaboi/dao/account_dao.dart';
+import 'package:jomaboi/dao/category_dao.dart';
+import 'package:jomaboi/helpers/db.helper.dart';
+import 'package:jomaboi/models/account.model.dart';
+import 'package:jomaboi/models/category.model.dart';
+import 'package:jomaboi/models/payment.model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class PaymentDao {
   Future<int> create(Payment payment) async {
     final db = await getDBInstance();
-    var result = db.insert("payments", payment.toJson());
+    var result = await db.insert("payments", payment.toJson());
     return result;
   }
 
@@ -28,22 +28,22 @@ class PaymentDao {
           "AND datetime BETWEEN DATE('${DateFormat('yyyy-MM-dd kk:mm:ss').format(range.start)}') AND DATE('${DateFormat('yyyy-MM-dd kk:mm:ss').format(range.end.add(const Duration(days: 1)))}')";
     }
 
-    //type check
+    // type check
     if (type != null) {
       where += "AND type='${type == PaymentType.credit ? "DR" : "CR"}' ";
     }
 
-    //icon check
+    // account check
     if (account != null) {
       where += "AND account='${account.id}' ";
     }
 
-    //icon check
+    // category check
     if (category != null) {
       where += "AND category='${category.id}' ";
     }
 
-    //categories
+    // Get categories and accounts
     List<Category> categories = await CategoryDao().find();
     List<Account> accounts = await AccountDao().find();
 
@@ -65,10 +65,8 @@ class PaymentDao {
 
   Future<int> update(Payment payment) async {
     final db = await getDBInstance();
-
     var result = await db.update("payments", payment.toJson(),
         where: "id = ?", whereArgs: [payment.id]);
-
     return result;
   }
 
@@ -81,7 +79,6 @@ class PaymentDao {
     } else {
       result = await db.insert("payments", payment.toJson());
     }
-
     return result;
   }
 
@@ -93,9 +90,7 @@ class PaymentDao {
 
   Future deleteAllTransactions() async {
     final db = await getDBInstance();
-    var result = await db.delete(
-      "payments",
-    );
+    var result = await db.delete("payments");
     return result;
   }
 }

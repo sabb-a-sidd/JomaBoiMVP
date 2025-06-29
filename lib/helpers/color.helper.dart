@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ColorHelper{
+class ColorHelper {
   static Color darken(Color color, [double amount = .1]) {
     assert(amount >= 0 && amount <= 1);
 

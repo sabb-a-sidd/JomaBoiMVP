@@ -2,39 +2,47 @@ import "dart:convert";
 import "dart:io";
 import "package:flutter/material.dart";
 import "package:path/path.dart";
-import "package:fintracker/helpers/migrations/migrations.dart";
+import "package:jomaboi/helpers/migrations/migrations.dart";
 import "package:sqflite_common_ffi/sqflite_ffi.dart";
-
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Database? database;
+
 Future<Database> getDBInstance() async {
   if (database == null) {
     Database db;
     if (Platform.isWindows) {
       sqfliteFfiInit();
       var databaseFactory = databaseFactoryFfi;
-      db = await databaseFactory.openDatabase("database.db",
-          options: OpenDatabaseOptions(
-              version: 1, onCreate: onCreate, onUpgrade: onUpgrade));
+      db = await databaseFactory.openDatabase(
+        "database.db",
+        options: OpenDatabaseOptions(
+          version: 1,
+          onCreate: onCreate,
+          onUpgrade: onUpgrade,
+        ),
+      );
     } else {
       String databasesPath = await getDatabasesPath();
       String dbPath = join(databasesPath, 'database.db');
-      db = await openDatabase(dbPath,
-          version: 1, onCreate: onCreate, onUpgrade: onUpgrade);
+      db = await openDatabase(
+        dbPath,
+        version: 1,
+        onCreate: onCreate,
+        onUpgrade: onUpgrade,
+      );
     }
-
     database = db;
     return db;
   } else {
-    Database db = database!;
-    return db;
+    return database!;
   }
 }
 
 typedef MigrationCallback = Function(Database database);
 List<MigrationCallback> migrations = [v1];
+
 void onCreate(Database database, int version) async {
   for (MigrationCallback callback in migrations) {
     await callback(database);
@@ -62,21 +70,15 @@ Future<void> resetDatabase() async {
     "isDefault": 1
   });
 
-  //prefill all categories
+  // prefill all categories
   List<Map<String, dynamic>> categories = [
     {"name": "Housing", "icon": Icons.house.codePoint},
     {"name": "Transportation", "icon": Icons.emoji_transportation.codePoint},
     {"name": "Groceries", "icon": Icons.local_grocery_store.codePoint},
     {"name": "Utilities", "icon": Icons.category.codePoint},
     {"name": "Insurance", "icon": Icons.health_and_safety.codePoint},
-    {
-      "name": "Medical & Healthcare",
-      "icon": Icons.medical_information.codePoint
-    },
-    {
-      "name": "Investments & Debt Payments",
-      "icon": Icons.attach_money.codePoint
-    },
+    {"name": "Medical & Healthcare", "icon": Icons.medical_information.codePoint},
+    {"name": "Investments & Debt Payments", "icon": Icons.attach_money.codePoint},
     {"name": "Personal Spending", "icon": Icons.house.codePoint},
     {"name": "Recreation & Entertainment", "icon": Icons.tv.codePoint},
     {"name": "Miscellaneous", "icon": Icons.library_books_sharp.codePoint},
@@ -88,14 +90,8 @@ Future<void> resetDatabase() async {
     {"name": "Groceries", "icon": Icons.local_grocery_store.codePoint},
     {"name": "Utilities", "icon": Icons.category.codePoint},
     {"name": "Insurance", "icon": Icons.health_and_safety.codePoint},
-    {
-      "name": "Medical & Healthcare",
-      "icon": Icons.medical_information.codePoint
-    },
-    {
-      "name": "Investments & Debt Payments",
-      "icon": Icons.attach_money.codePoint
-    },
+    {"name": "Medical & Healthcare", "icon": Icons.medical_information.codePoint},
+    {"name": "Investments & Debt Payments", "icon": Icons.attach_money.codePoint},
     {"name": "Personal Spending", "icon": Icons.house.codePoint},
     {"name": "Recreation & Entertainment", "icon": Icons.tv.codePoint},
     {"name": "Miscellaneous", "icon": Icons.library_books_sharp.codePoint},
@@ -123,15 +119,12 @@ Future<void> resetDatabase() async {
 }
 
 Future<String> getExternalDocumentPath() async {
-  // To check whether permission is given for this app or not.
   var status = await Permission.storage.status;
   if (!status.isGranted) {
-    // If not we will ask for permission first
     await Permission.storage.request();
   }
   Directory directory = Directory("");
   if (Platform.isAndroid) {
-    // Redirects it to download folder in android
     directory = Directory("/storage/emulated/0/Download");
   } else {
     directory = await getApplicationDocumentsDirectory();
@@ -143,32 +136,19 @@ Future<String> getExternalDocumentPath() async {
 }
 
 Future<dynamic> export() async {
-  List<dynamic> accounts = await database!.query(
-    "accounts",
-  );
+  List<dynamic> accounts = await database!.query("accounts");
+  List<dynamic> groups = await database!.query("groups");
+  List<dynamic> categories = await database!.query("categories");
+  List<dynamic> payments = await database!.query("payments");
 
-  List<dynamic> groups = await database!.query(
-    "groups",
-  );
-
-  List<dynamic> categories = await database!.query(
-    "categories",
-  );
-
-  List<dynamic> payments = await database!.query(
-    "payments",
-  );
   Map<String, dynamic> data = {};
   data["accounts"] = accounts;
-
   data["groups"] = groups;
   data["categories"] = categories;
-
   data["payments"] = payments;
 
   final path = await getExternalDocumentPath();
-  String name =
-      "fintracker-backup-${DateTime.now().millisecondsSinceEpoch}.json";
+  String name = "jomaboi-backup-${DateTime.now().millisecondsSinceEpoch}.json";
   File file = File('$path/$name');
   await file.writeAsString(jsonEncode(data));
   return file.path;
